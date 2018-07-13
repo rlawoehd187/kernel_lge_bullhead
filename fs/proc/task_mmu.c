@@ -747,7 +747,7 @@ static int show_smap(struct seq_file *m, void *v, int is_pid)
 			   mss->swap >> 10,
 			   (unsigned long)(mss->swap_pss >> (10 + PSS_SHIFT)),
 			   (vma->vm_flags & VM_LOCKED) ?
-				(unsigned long)(mss->pss >> (10 + PSS_SHIFT)) : 0);
+				(unsigned long)(mss->pss_locked >> (10 + PSS_SHIFT)) : 0);
 
 	if (!rollup_mode && vma->vm_flags & VM_NONLINEAR)
 		seq_printf(m, "Nonlinear:      %8lu kB\n",
