@@ -519,7 +519,7 @@ struct mem_size_stats {
 
 
 static void smaps_pte_entry(pte_t ptent, unsigned long addr,
-		unsigned long ptent_size, struct mm_walk *walk)
+		unsigned long ptent_size, struct mm_walk *walk, bool locked)
 {
 	struct mem_size_stats *mss = walk->private;
 	struct vm_area_struct *vma = mss->vma;
@@ -544,6 +544,8 @@ static void smaps_pte_entry(pte_t ptent, unsigned long addr,
 				mss->swap_pss += pss_delta;
 			} else {
 				mss->swap_pss += (u64)PAGE_SIZE << PSS_SHIFT;
+				if (locked)
+					mss->pss_locked += (u64)PAGE_SIZE << PSS_SHIFT;
 			}
 		} else if (is_migration_entry(swpent))
 			page = migration_entry_to_page(swpent);
@@ -566,18 +568,23 @@ static void smaps_pte_entry(pte_t ptent, unsigned long addr,
 	if (pte_young(ptent) || PageReferenced(page))
 		mss->referenced += ptent_size;
 	mapcount = page_mapcount(page);
+	unsigned long pss = (PAGE_SIZE << PSS_SHIFT);
 	if (mapcount >= 2) {
 		if (pte_dirty(ptent) || PageDirty(page))
 			mss->shared_dirty += ptent_size;
 		else
 			mss->shared_clean += ptent_size;
-		mss->pss += (ptent_size << PSS_SHIFT) / mapcount;
+		mss->pss += pss / mapcount;
+		if (locked)
+			mss->pss_locked += pss / mapcount;
 	} else {
 		if (pte_dirty(ptent) || PageDirty(page))
 			mss->private_dirty += ptent_size;
 		else
 			mss->private_clean += ptent_size;
-		mss->pss += (ptent_size << PSS_SHIFT);
+		mss->pss += pss;
+		if (locked)
+			mss->pss_locked += pss;
 	}
 }
 
@@ -586,11 +593,12 @@ static int smaps_pte_range(pmd_t *pmd, unsigned long addr, unsigned long end,
 {
 	struct mem_size_stats *mss = walk->private;
 	struct vm_area_struct *vma = mss->vma;
+	bool locked = !!(vma->vm_flags & VM_LOCKED);
 	pte_t *pte;
 	spinlock_t *ptl;
 
 	if (pmd_trans_huge_lock(pmd, vma) == 1) {
-		smaps_pte_entry(*(pte_t *)pmd, addr, HPAGE_PMD_SIZE, walk);
+		smaps_pte_entry(*(pte_t *)pmd, addr, HPAGE_PMD_SIZE, walk, locked);
 		spin_unlock(&walk->mm->page_table_lock);
 		mss->anonymous_thp += HPAGE_PMD_SIZE;
 		return 0;
@@ -605,7 +613,7 @@ static int smaps_pte_range(pmd_t *pmd, unsigned long addr, unsigned long end,
 	 */
 	pte = pte_offset_map_lock(vma->vm_mm, pmd, addr, &ptl);
 	for (; addr != end; pte++, addr += PAGE_SIZE)
-		smaps_pte_entry(*pte, addr, PAGE_SIZE, walk);
+		smaps_pte_entry(*pte, addr, PAGE_SIZE, walk, locked);
 	pte_unmap_unlock(pte - 1, ptl);
 	cond_resched();
 	return 0;
@@ -698,9 +706,6 @@ static int show_smap(struct seq_file *m, void *v, int is_pid)
 	if (vma->vm_mm && !is_vm_hugetlb_page(vma))
 		walk_page_range(vma->vm_start, vma->vm_end, &smaps_walk);
 
-	if (vma->vm_flags & VM_LOCKED)
-		mss->pss_locked += mss->pss;
-
 	if (!rollup_mode) {
 		show_map_vma(m, vma, is_pid);
 	} else if (last_vma) {
@@ -746,8 +751,7 @@ static int show_smap(struct seq_file *m, void *v, int is_pid)
 			   mss->anonymous_thp >> 10,
 			   mss->swap >> 10,
 			   (unsigned long)(mss->swap_pss >> (10 + PSS_SHIFT)),
-			   (vma->vm_flags & VM_LOCKED) ?
-				(unsigned long)(mss->pss_locked >> (10 + PSS_SHIFT)) : 0);
+			   (unsigned long)(mss->pss_locked >> (10 + PSS_SHIFT)));
 
 	if (!rollup_mode && vma->vm_flags & VM_NONLINEAR)
 		seq_printf(m, "Nonlinear:      %8lu kB\n",
