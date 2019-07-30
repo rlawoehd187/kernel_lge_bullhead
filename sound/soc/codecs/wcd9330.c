@@ -98,6 +98,9 @@ MODULE_PARM_DESC(cpe_debug_mode, "boot cpe in debug mode");
 static atomic_t kp_tomtom_priv;
 
 static int high_perf_mode = 1;
+module_param(high_perf_mode, int,
+			S_IRUGO | S_IWUSR | S_IWGRP);
+MODULE_PARM_DESC(high_perf_mode, "enable/disable class AB config for hph");
 
 static struct afe_param_slimbus_slave_port_cfg tomtom_slimbus_slave_port_cfg = {
 	.minor_version = 1,
@@ -731,6 +734,19 @@ static bool tomtom_bit_format_greater_eq(struct snd_soc_codec *codec,
 			return true;
 	}
 
+	return false;
+}
+
+static bool tomtom_bit_format_greater_eq(struct snd_soc_codec *codec,
+					 int bit_format)
+{
+	struct tomtom_priv *tomtom_p = snd_soc_codec_get_drvdata(codec);
+	int i;
+
+	for (i = 0; i < NUM_CODEC_DAIS; i++) {
+		if (tomtom_p->dai[i].bit_width >= bit_format)
+			return true;
+	}
 	return false;
 }
 
