@@ -27,6 +27,7 @@
 #define SYNAPTICS_DSX_DRIVER_VERSION 0x1005
 
 #include <linux/version.h>
+#include <linux/pm_qos.h>
 
 #ifdef CONFIG_FB
 #include <linux/notifier.h>
@@ -291,6 +292,7 @@ struct synaptics_rmi4_data {
 	struct clk *iface_clk;
 #endif
 	ktime_t timestamp;
+	struct pm_qos_request pm_qos_req;
 };
 
 enum exp_fn {
