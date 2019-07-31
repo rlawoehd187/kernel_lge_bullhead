@@ -116,11 +116,11 @@ enum device_status {
 #define F12_MAX_X		65536
 #define F12_MAX_Y		65536
 
-static int synaptics_rmi4_i2c_read(struct synaptics_rmi4_data *rmi4_data,
+static inline int synaptics_rmi4_i2c_read(struct synaptics_rmi4_data *rmi4_data,
 		unsigned short addr, unsigned char *data,
 		unsigned short length);
 
-static int synaptics_rmi4_i2c_write(struct synaptics_rmi4_data *rmi4_data,
+static inline int synaptics_rmi4_i2c_write(struct synaptics_rmi4_data *rmi4_data,
 		unsigned short addr, unsigned char *data,
 		unsigned short length);
 
@@ -583,8 +583,8 @@ static void synaptics_secure_touch_notify(struct synaptics_rmi4_data *data)
 }
 static irqreturn_t synaptics_filter_interrupt(struct synaptics_rmi4_data *data)
 {
-	if (atomic_read(&data->st_enabled)) {
-		if (atomic_cmpxchg(&data->st_pending_irqs, 0, 1) == 0) {
+	if (likely(atomic_read(&data->st_enabled))) {
+		if (likely(atomic_cmpxchg(&data->st_pending_irqs, 0, 1) == 0)) {
 			synaptics_secure_touch_notify(data);
 			wait_for_completion_interruptible(
 				&data->st_irq_processed);
@@ -835,7 +835,7 @@ static ssize_t synaptics_rmi4_f01_reset_store(struct device *dev,
 	}
 
 	retval = synaptics_rmi4_reset_device(rmi4_data);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(dev,
 			"%s: Failed to issue reset command, error = %d\n",
 			__func__, retval);
@@ -886,7 +886,7 @@ static ssize_t synaptics_rmi4_f01_flashprog_show(struct device *dev,
 			rmi4_data->f01_data_base_addr,
 			device_status.data,
 			sizeof(device_status.data));
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(dev,
 				"%s: Failed to read device status, error = %d\n",
 				__func__, retval);
@@ -1146,7 +1146,7 @@ static int synaptics_rmi4_set_page(struct synaptics_rmi4_data *rmi4_data,
  * starting from an assigned register address of the sensor, via I2C
  * with a retry mechanism.
  */
-static int synaptics_rmi4_i2c_read(struct synaptics_rmi4_data *rmi4_data,
+static inline int synaptics_rmi4_i2c_read(struct synaptics_rmi4_data *rmi4_data,
 		unsigned short addr, unsigned char *data, unsigned short length)
 {
 	int retval;
@@ -1209,7 +1209,7 @@ exit:
  * starting from an assigned register address of the sensor, via I2C with
  * a retry mechanism.
  */
-static int synaptics_rmi4_i2c_write(struct synaptics_rmi4_data *rmi4_data,
+static inline int synaptics_rmi4_i2c_write(struct synaptics_rmi4_data *rmi4_data,
 		unsigned short addr, unsigned char *data, unsigned short length)
 {
 	int retval;
@@ -1579,7 +1579,7 @@ static void synaptics_rmi4_f1a_report(struct synaptics_rmi4_data *rmi4_data,
 			data_addr,
 			f1a->button_data_buffer,
 			f1a->button_bitmask_size);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&rmi4_data->i2c_client->dev,
 				"%s: Failed to read button data registers\n",
 				__func__);
@@ -1804,8 +1804,13 @@ static irqreturn_t synaptics_rmi4_irq(int irq, void *data)
 	if (IRQ_HANDLED == synaptics_filter_interrupt(data))
 		return IRQ_HANDLED;
 
+	/* Prevent CPU from entering deep sleep */
+	pm_qos_update_request(&rmi4_data->pm_qos_req, 100);
+
 	if (synaptics_rmi4_sensor_report(rmi4_data) == -EIO)
 		queue_work(rmi4_data->det_workqueue, &rmi4_data->recovery_work);
+
+	pm_qos_update_request(&rmi4_data->pm_qos_req, PM_QOS_DEFAULT_VALUE);
 
 	return IRQ_HANDLED;
 }
@@ -2445,7 +2450,7 @@ static int synaptics_rmi4_f12_init(struct synaptics_rmi4_data *rmi4_data,
 				fhandler->full_addr.ctrl_base + ctrl_24_offset,
 				ctrl_24.data,
 				sizeof(ctrl_24.data));
-		if (retval < 0) {
+		if (unlikely(retval < 0)) {
 			dev_err(&rmi4_data->i2c_client->dev,
 					"%s: Failed to read hover register, error = %d\n",
 					__func__, retval);
@@ -2458,7 +2463,7 @@ static int synaptics_rmi4_f12_init(struct synaptics_rmi4_data *rmi4_data,
 				fhandler->full_addr.ctrl_base + ctrl_24_offset,
 				ctrl_24.data,
 				sizeof(ctrl_24.data));
-		if (retval < 0) {
+		if (unlikely(retval < 0)) {
 			dev_err(&rmi4_data->i2c_client->dev,
 					"%s: Failed to write hover register, error = %d\n",
 					__func__, retval);
@@ -2668,7 +2673,7 @@ static int synaptics_rmi4_f1a_alloc_mem(struct synaptics_rmi4_data *rmi4_data,
 			fhandler->full_addr.query_base,
 			f1a->button_query.data,
 			sizeof(f1a->button_query.data));
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&rmi4_data->i2c_client->dev,
 				"%s: Failed to read query registers\n",
 				__func__);
@@ -2781,11 +2786,11 @@ static int synaptics_rmi4_f1a_init(struct synaptics_rmi4_data *rmi4_data,
 		fhandler->intr_mask |= 1 << ii;
 
 	retval = synaptics_rmi4_f1a_alloc_mem(rmi4_data, fhandler);
-	if (retval < 0)
+	if (unlikely(retval < 0))
 		goto error_exit;
 
 	retval = synaptics_rmi4_capacitance_button_map(rmi4_data, fhandler);
-	if (retval < 0)
+	if (unlikely(retval < 0))
 		goto error_exit;
 
 	rmi4_data->button_0d_enabled = 1;
@@ -2871,7 +2876,7 @@ static int synaptics_rmi4_query_device_info(
 			rmi4_data->f01_query_base_addr + F01_PACKAGE_ID_OFFSET,
 			pkg_id,
 			sizeof(pkg_id));
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&rmi4_data->i2c_client->dev,
 				"%s: Failed to read device package id (code %d)\n",
 				__func__, retval);
@@ -2885,7 +2890,7 @@ static int synaptics_rmi4_query_device_info(
 			rmi4_data->f01_query_base_addr + F01_BUID_ID_OFFSET,
 			rmi->build_id,
 			sizeof(rmi->build_id));
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&rmi4_data->i2c_client->dev,
 				"%s: Failed to read firmware build id (code %d)\n",
 				__func__, retval);
@@ -3023,7 +3028,7 @@ static int synaptics_rmi4_query_device(struct synaptics_rmi4_data *rmi4_data)
 
 				retval = synaptics_rmi4_alloc_fh(&fhandler,
 						&rmi_fd, page_number);
-				if (retval < 0) {
+				if (unlikely(retval < 0)) {
 					dev_err(&rmi4_data->i2c_client->dev,
 							"%s: Failed to alloc for F%d\n",
 							__func__,
@@ -3043,7 +3048,7 @@ static int synaptics_rmi4_query_device(struct synaptics_rmi4_data *rmi4_data)
 
 				retval = synaptics_rmi4_alloc_fh(&fhandler,
 						&rmi_fd, page_number);
-				if (retval < 0) {
+				if (unlikely(retval < 0)) {
 					dev_err(&rmi4_data->i2c_client->dev,
 							"%s: Failed to alloc for F%d\n",
 							__func__,
@@ -3063,7 +3068,7 @@ static int synaptics_rmi4_query_device(struct synaptics_rmi4_data *rmi4_data)
 
 				retval = synaptics_rmi4_alloc_fh(&fhandler,
 						&rmi_fd, page_number);
-				if (retval < 0) {
+				if (unlikely(retval < 0)) {
 					dev_err(&rmi4_data->i2c_client->dev,
 							"%s: Failed to alloc for F%d\n",
 							__func__,
@@ -3214,7 +3219,7 @@ static int synaptics_rmi4_reset_command(struct synaptics_rmi4_data *rmi4_data)
 			rmi4_data->f01_cmd_base_addr,
 			&command,
 			sizeof(command));
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&rmi4_data->i2c_client->dev,
 				"%s: Failed to issue reset command, error = %d\n",
 				__func__, retval);
@@ -3259,7 +3264,7 @@ static int synaptics_rmi4_reset_device(struct synaptics_rmi4_data *rmi4_data)
 	INIT_LIST_HEAD(&rmi->support_fn_list);
 
 	retval = synaptics_rmi4_query_device(rmi4_data);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&rmi4_data->i2c_client->dev,
 				"%s: Failed to query device\n",
 				__func__);
@@ -3482,7 +3487,7 @@ static int synaptics_rmi4_power_on(struct synaptics_rmi4_data *rmi4_data,
 
 	retval = reg_set_optimum_mode_check(rmi4_data->vdd,
 		RMI4_ACTIVE_LOAD_UA);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&rmi4_data->i2c_client->dev,
 			"Regulator vdd set_opt failed rc=%d\n",
 			retval);
@@ -3500,7 +3505,7 @@ static int synaptics_rmi4_power_on(struct synaptics_rmi4_data *rmi4_data,
 	if (rmi4_data->board->i2c_pull_up) {
 		retval = reg_set_optimum_mode_check(rmi4_data->vcc_i2c,
 			RMI4_I2C_LOAD_UA);
-		if (retval < 0) {
+		if (unlikely(retval < 0)) {
 			dev_err(&rmi4_data->i2c_client->dev,
 				"Regulator vcc_i2c set_opt failed rc=%d\n",
 				retval);
@@ -3691,7 +3696,7 @@ static void synaptics_rmi4_init_work(struct work_struct *work)
 	synaptics_secure_touch_stop(rmi4_data, 1);
 
 	retval = synaptics_rmi4_regulator_lpm(rmi4_data, false);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(dev, "Failed to enter active power mode\n");
 		return;
 	}
@@ -3700,12 +3705,12 @@ static void synaptics_rmi4_init_work(struct work_struct *work)
 		if (rmi4_data->ts_pinctrl) {
 			retval = pinctrl_select_state(rmi4_data->ts_pinctrl,
 					rmi4_data->pinctrl_state_active);
-			if (retval < 0)
+			if (unlikely(retval < 0))
 				dev_err(dev, "failed to select default pinctrl state\n");
 		}
 
 		retval = synaptics_rmi4_gpio_configure(rmi4_data, true);
-		if (retval < 0) {
+		if (unlikely(retval < 0)) {
 			dev_err(dev, "Failed to put gpios in active state\n");
 			goto err_gpio_configure;
 		}
@@ -3717,7 +3722,7 @@ static void synaptics_rmi4_init_work(struct work_struct *work)
 
 	synaptics_rmi4_sensor_wake(rmi4_data);
 	retval = synaptics_rmi4_check_configuration(rmi4_data);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&(rmi4_data->input_dev->dev),
 				"Failed to check configuration\n");
 		goto err_check_configuration;
@@ -3740,7 +3745,7 @@ err_check_configuration:
 		if (rmi4_data->ts_pinctrl) {
 			retval = pinctrl_select_state(rmi4_data->ts_pinctrl,
 					rmi4_data->pinctrl_state_suspend);
-			if (retval < 0)
+			if (unlikely(retval < 0))
 				dev_err(dev, "failed to select idle pinctrl state\n");
 		}
 
@@ -3755,7 +3760,7 @@ err_gpio_configure:
 	if (rmi4_data->ts_pinctrl) {
 		retval = pinctrl_select_state(rmi4_data->ts_pinctrl,
 					rmi4_data->pinctrl_state_suspend);
-		if (retval < 0)
+		if (unlikely(retval < 0))
 			pr_err("failed to select idle pinctrl state\n");
 	}
 	synaptics_rmi4_regulator_lpm(rmi4_data, true);
@@ -3882,13 +3887,13 @@ static int synaptics_rmi4_probe(struct i2c_client *client,
 #endif
 
 	retval = synaptics_rmi4_regulator_configure(rmi4_data, true);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&client->dev, "Failed to configure regulators\n");
 		goto err_reg_configure;
 	}
 
 	retval = synaptics_rmi4_power_on(rmi4_data, true);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&client->dev, "Failed to power on\n");
 		goto err_power_device;
 	}
@@ -3908,7 +3913,7 @@ static int synaptics_rmi4_probe(struct i2c_client *client,
 	}
 
 	retval = synaptics_rmi4_gpio_configure(rmi4_data, true);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&client->dev, "Failed to configure gpios\n");
 		goto err_gpio_config;
 	}
@@ -3920,7 +3925,7 @@ static int synaptics_rmi4_probe(struct i2c_client *client,
 	mutex_init(&rmi->support_fn_list_mutex);
 
 	retval = synaptics_rmi4_query_device(rmi4_data);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&client->dev,
 				"%s: Failed to query device\n",
 				__func__);
@@ -3930,7 +3935,7 @@ static int synaptics_rmi4_probe(struct i2c_client *client,
 	if (platform_data->detect_device) {
 		retval = synaptics_rmi4_parse_dt_children(&client->dev,
 				platform_data, rmi4_data);
-		if (retval < 0)
+		if (unlikely(retval < 0))
 			dev_err(&client->dev,
 				"%s: Failed to parse device tree property\n",
 					__func__);
@@ -4059,7 +4064,7 @@ static int synaptics_rmi4_probe(struct i2c_client *client,
 	for (attr_count = 0; attr_count < ARRAY_SIZE(attrs); attr_count++) {
 		retval = sysfs_create_file(&client->dev.kobj,
 				&attrs[attr_count].attr);
-		if (retval < 0) {
+		if (unlikely(retval < 0)) {
 			dev_err(&client->dev,
 					"%s: Failed to create sysfs attributes\n",
 					__func__);
@@ -4077,7 +4082,7 @@ static int synaptics_rmi4_probe(struct i2c_client *client,
 		DRIVER_NAME, rmi4_data);
 	rmi4_data->irq_enabled = true;
 
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&client->dev,
 				"%s: Failed to create irq thread\n",
 				__func__);
@@ -4088,7 +4093,7 @@ static int synaptics_rmi4_probe(struct i2c_client *client,
 	synaptics_secure_touch_stop(rmi4_data, 1);
 
 	retval = synaptics_rmi4_check_configuration(rmi4_data);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&client->dev, "Failed to check configuration\n");
 		goto err_check_configuration;
 	}
@@ -4220,7 +4225,7 @@ static int synaptics_rmi4_remove(struct i2c_client *client)
 		} else {
 			retval = pinctrl_select_state(rmi4_data->ts_pinctrl,
 					rmi4_data->pinctrl_state_release);
-			if (retval < 0)
+			if (unlikely(retval < 0))
 				pr_err("failed to select release pinctrl state\n");
 		}
 	}
@@ -4249,7 +4254,7 @@ static void synaptics_rmi4_sensor_sleep(struct synaptics_rmi4_data *rmi4_data)
 			rmi4_data->f01_ctrl_base_addr,
 			device_ctrl.data,
 			sizeof(device_ctrl.data));
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&(rmi4_data->input_dev->dev),
 				"%s: Failed to enter sleep mode\n",
 				__func__);
@@ -4264,7 +4269,7 @@ static void synaptics_rmi4_sensor_sleep(struct synaptics_rmi4_data *rmi4_data)
 			rmi4_data->f01_ctrl_base_addr,
 			device_ctrl.data,
 			sizeof(device_ctrl.data));
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&(rmi4_data->input_dev->dev),
 				"%s: Failed to enter sleep mode\n",
 				__func__);
@@ -4293,7 +4298,7 @@ static void synaptics_rmi4_sensor_wake(struct synaptics_rmi4_data *rmi4_data)
 			rmi4_data->f01_ctrl_base_addr,
 			device_ctrl.data,
 			sizeof(device_ctrl.data));
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&(rmi4_data->input_dev->dev),
 				"%s: Failed to wake from sleep mode\n",
 				__func__);
@@ -4314,7 +4319,7 @@ static void synaptics_rmi4_sensor_wake(struct synaptics_rmi4_data *rmi4_data)
 			rmi4_data->f01_ctrl_base_addr,
 			device_ctrl.data,
 			sizeof(device_ctrl.data));
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&(rmi4_data->input_dev->dev),
 				"%s: Failed to wake from sleep mode\n",
 				__func__);
@@ -4435,7 +4440,7 @@ static int synaptics_rmi4_regulator_lpm(struct synaptics_rmi4_data *rmi4_data,
 			0 : RMI4_I2C_LPM_LOAD_UA;
 		retval = reg_set_optimum_mode_check(rmi4_data->vcc_i2c,
 			load_ua);
-		if (retval < 0) {
+		if (unlikely(retval < 0)) {
 			dev_err(&rmi4_data->i2c_client->dev,
 				"Regulator vcc_i2c set_opt failed " \
 				"rc=%d\n", retval);
@@ -4458,7 +4463,7 @@ static int synaptics_rmi4_regulator_lpm(struct synaptics_rmi4_data *rmi4_data,
 
 	load_ua = rmi4_data->board->power_down_enable ? 0 : RMI4_LPM_LOAD_UA;
 	retval = reg_set_optimum_mode_check(rmi4_data->vdd, load_ua);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&rmi4_data->i2c_client->dev,
 			"Regulator vdd_ana set_opt failed rc=%d\n",
 			retval);
@@ -4483,7 +4488,7 @@ regulator_hpm:
 
 	retval = reg_set_optimum_mode_check(rmi4_data->vdd,
 				RMI4_ACTIVE_LOAD_UA);
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&rmi4_data->i2c_client->dev,
 			"Regulator vcc_ana set_opt failed rc=%d\n",
 			retval);
@@ -4503,7 +4508,7 @@ regulator_hpm:
 	if (rmi4_data->board->i2c_pull_up) {
 		retval = reg_set_optimum_mode_check(rmi4_data->vcc_i2c,
 			RMI4_I2C_LOAD_UA);
-		if (retval < 0) {
+		if (unlikely(retval < 0)) {
 			dev_err(&rmi4_data->i2c_client->dev,
 				"Regulator vcc_i2c set_opt failed rc=%d\n",
 				retval);
@@ -4581,7 +4586,7 @@ static int synaptics_rmi4_check_configuration(struct synaptics_rmi4_data
 			rmi4_data->f01_data_base_addr,
 			device_status.data,
 			sizeof(device_status.data));
-	if (retval < 0) {
+	if (unlikely(retval < 0)) {
 		dev_err(&rmi4_data->i2c_client->dev,
 			"Failed to read device status, rc=%d\n", retval);
 		return retval;
@@ -4589,7 +4594,7 @@ static int synaptics_rmi4_check_configuration(struct synaptics_rmi4_data
 
 	if (device_status.unconfigured) {
 		retval = synaptics_rmi4_query_device(rmi4_data);
-		if (retval < 0) {
+		if (unlikely(retval < 0)) {
 			dev_err(&rmi4_data->i2c_client->dev,
 				"Failed to query device, rc=%d\n", retval);
 			return retval;
@@ -4643,7 +4648,7 @@ static int synaptics_rmi4_suspend(struct device *dev)
 		synaptics_rmi4_release_all(rmi4_data);
 
 		retval = synaptics_rmi4_regulator_lpm(rmi4_data, true);
-		if (retval < 0) {
+		if (unlikely(retval < 0)) {
 			dev_err(dev, "failed to enter low power mode\n");
 			goto err_lpm_regulator;
 		}
@@ -4657,12 +4662,12 @@ static int synaptics_rmi4_suspend(struct device *dev)
 		if (rmi4_data->ts_pinctrl) {
 			retval = pinctrl_select_state(rmi4_data->ts_pinctrl,
 					rmi4_data->pinctrl_state_suspend);
-			if (retval < 0)
+			if (unlikely(retval < 0))
 				dev_err(dev, "failed to select idle pinctrl state\n");
 		}
 
 		retval = synaptics_rmi4_gpio_configure(rmi4_data, false);
-		if (retval < 0) {
+		if (unlikely(retval < 0)) {
 			dev_err(dev, "failed to put gpios in suspend state\n");
 			goto err_gpio_configure;
 		}
@@ -4677,7 +4682,7 @@ err_gpio_configure:
 	if (rmi4_data->ts_pinctrl) {
 		retval = pinctrl_select_state(rmi4_data->ts_pinctrl,
 					rmi4_data->pinctrl_state_active);
-		if (retval < 0)
+		if (unlikely(retval < 0))
 			dev_err(dev, "failed to select get default pinctrl state\n");
 	}
 	synaptics_rmi4_regulator_lpm(rmi4_data, false);
