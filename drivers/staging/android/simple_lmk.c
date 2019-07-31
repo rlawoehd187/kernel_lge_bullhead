@@ -18,6 +18,11 @@
 #include <uapi/linux/sched/types.h>
 #endif
 
+/* MAX_RT_PRIO is located elsewhere in older kernels */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 18, 0)
+#include <linux/sched/rt.h>
+#endif
+
 /* SEND_SIG_FORCED isn't present in newer kernels */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0)
 #define SIG_INFO_TYPE SEND_SIG_FORCED
@@ -30,6 +35,11 @@
 #define KILL_GROUP_TYPE true
 #else
 #define KILL_GROUP_TYPE PIDTYPE_TGID
+#endif
+
+/* MIN_NICE isn't present in older kernels */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 18, 0)
+#define MIN_NICE -20
 #endif
 
 /* The minimum number of pages to free per reclaim */
