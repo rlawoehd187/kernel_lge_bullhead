@@ -1,0 +1,228 @@
+53ca19b962bd HEAD@{2210}: reset: moving to HEAD
+53ca19b962bd HEAD@{2211}: reset: moving to HEAD
+53ca19b962bd HEAD@{2212}: reset: moving to HEAD
+53ca19b962bd HEAD@{2213}: reset: moving to HEAD
+53ca19b962bd HEAD@{2214}: cherry-pick: arm64: lib: optimised strrchr for armv8
+59770c9893b1 HEAD@{2215}: cherry-pick: arm64: lib: optimized memcmp for aarch64
+50452f136249 HEAD@{2216}: cherry-pick: arm64: support __int128 on gcc 5+
+dc4eac9dc696 HEAD@{2217}: cherry-pick: makefile: Add --strip-debug flag
+87fe571b6e44 HEAD@{2218}: cherry-pick: usb: gadget: Android HID driver
+dbee33417671 HEAD@{2219}: cherry-pick: usb: phy: fix dual role sysfs build if kernel modules are supported
+720afcd6e58b HEAD@{2220}: cherry-pick: defconfig: add nethunter defconfig changes
+9c8ac103743a HEAD@{2221}: commit: net: support monitor mode on WLAN interfaces
+1883bd16040f HEAD@{2222}: cherry-pick: kernel: Fix potential refcount leak in su check
+cc4639b62440 HEAD@{2223}: rebase -i (finish): returning to refs/heads/latest
+cc4639b62440 HEAD@{2224}: rebase -i (pick): kernel: Only expose su when daemon is running
+018bf0a1576d HEAD@{2225}: rebase -i (reword): staging: qcacld-2.0: add specialized MAC randomization
+726bfe17d4a4 HEAD@{2226}: rebase -i (reword): net: wcnss: fix 3 byte buffer overflow on MAC change
+a1dca3272598 HEAD@{2227}: rebase -i: fast-forward
+049fa25e9ada HEAD@{2228}: rebase -i (start): checkout a1dca3272598^
+c193995d0bdd HEAD@{2229}: reset: moving to c193995d0bdd
+c193995d0bdd HEAD@{2230}: rebase -i (abort): updating HEAD
+c193995d0bdd HEAD@{2231}: rebase: aborting
+c193995d0bdd HEAD@{2232}: cherry-pick: kernel: Only expose su when daemon is running
+372c8a0fce74 HEAD@{2233}: cherry-pick: staging: qcacld-2.0: add specialized MAC randomization
+a1dca3272598 HEAD@{2234}: cherry-pick: net: wcnss: fix 3 byte buffer overflow on MAC change
+049fa25e9ada HEAD@{2235}: cherry-pick: init: use kernel command-line for early entropy
+6b79fe0e55bf HEAD@{2236}: cherry-pick: mm: real slab_equal_or_root check for !MEMCG_KMEM
+870728abe7c0 HEAD@{2237}: cherry-pick: mm: add missing cache_from_obj !PageSlab check
+8bfa7e53ba91 HEAD@{2238}: cherry-pick: mm: add multi-purpose random cookies for slub
+20cd622c144e HEAD@{2239}: cherry-pick: mm: add slub free list XOR encryption
+fdf699c4da1c HEAD@{2240}: cherry-pick: mm: disable slab merging by default
+27b49674ad1f HEAD@{2241}: cherry-pick: mm: add slub check for write-after-free
+52d1b9c1e763 HEAD@{2242}: cherry-pick: mm: add slub sanitization
+d5e80154c835 HEAD@{2243}: cherry-pick: mm: add page sanitization / verification
+6b7111b7a768 HEAD@{2244}: cherry-pick: ARM64: asm: zero the leading stack canary byte
+d406c4d7d86a HEAD@{2245}: cherry-pick: mm: gather extra early boot entropy like PaX
+53b7f41f4131 HEAD@{2246}: cherry-pick: defconfig: enable Yama
+c7f98829bef2 HEAD@{2247}: cherry-pick: fs: port of grsecurity's DEVICE_SIDECHANNEL feature
+5161d9f69e03 HEAD@{2248}: cherry-pick: defconfig: enable rpfilter support in netfilter
+12574dbbcb14 HEAD@{2249}: cherry-pick: slimbus:ratelimit the warning and errors
+c9ba5db70b8b HEAD@{2250}: cherry-pick: slim-msm: Differentiate SSR from Noise during power up
+13ce3d90a111 HEAD@{2251}: cherry-pick: slim: msm: Handle slimbus HW noise during early boot-up
+b58c85940907 HEAD@{2252}: cherry-pick: slimbus: Reset data channels for a controller when framer reboots
+362ca44386b0 HEAD@{2253}: cherry-pick: slim-msm-ngd:Avoid using stale pipe handle
+2a261a5a458f HEAD@{2254}: cherry-pick: slimbus: Fix potential memory leak
+19bb540c02e2 HEAD@{2255}: cherry-pick: slim: msm: Improve bulk message timeout error handling
+26929f928cd2 HEAD@{2256}: cherry-pick: slim_msm: Gracefully handle QMI timeout failures
+dc30a36b65bb HEAD@{2257}: cherry-pick: slim-msm: Add support to set port config and options
+695bc44e5b0b HEAD@{2258}: cherry-pick: slim-msm: Configure push pull protocol on MSM Controller
+826442686589 HEAD@{2259}: cherry-pick: slimbus: Add support to specify port config and options
+7b49a57825e7 HEAD@{2260}: cherry-pick: slimbus: msm: Deinit/Reinit BAM pipe after SSR
+cdcaeb9e799a HEAD@{2261}: cherry-pick: slim_msm: Handle BAM resources
+654a99d50e9d HEAD@{2262}: cherry-pick: slim_ngd: Serialize shutdown sequence during SSR down
+9b2d45b549be HEAD@{2263}: cherry-pick: slim_msm: Reorganise Rx/Tx tear-down during DSP-SSR
+e75dee9f8d20 HEAD@{2264}: cherry-pick: slimbus: ngd: Rely on HW status for capability negotiation message
+cd44ac18d5fa HEAD@{2265}: cherry-pick: slimbus: ngd: Optimize bulk write transactions
+a5d0634602aa HEAD@{2266}: cherry-pick: slimbus: Support multiple message transactions per call
+c2c6ab043893 HEAD@{2267}: cherry-pick: slim-msm: Optimize QMI response timeout
+5122106bac83 HEAD@{2268}: cherry-pick: slim: msm: Return success for ch-remove type of messages during SSR
+a9af10b4c37e HEAD@{2269}: cherry-pick: slim: msm: Fix the instance number being sent to ADSP
+9b51920566ca HEAD@{2270}: cherry-pick: slim-msm: reset port interrrupt status register when disconnected
+9970ac55b919 HEAD@{2271}: cherry-pick: slim-msm: manage TX message queue pointer
+507df75ae0cd HEAD@{2272}: cherry-pick: mfd: wcd9xxx-slimslave: Add support for 44.1KHz sample rate
+51aa2e6f1012 HEAD@{2273}: cherry-pick: ASoC: msm: qdsp6v2: add support for ALAC/APE/VORBIS
+974341e88d4a HEAD@{2274}: cherry-pick: ASoC: msm8992/msm8994: add support for packed 24 bit
+a93c09061b2b HEAD@{2275}: cherry-pick: ASoC: wcd9330: add support for packed 24 bit.
+61287734d2a9 HEAD@{2276}: cherry-pick: ASoC: audio: fix audio drops issue in HPH for loud clips
+627db810c0b3 HEAD@{2277}: cherry-pick: ASoC: wcd9xxx: revert back the gnd-mic switch if flipped
+1d889f8435c2 HEAD@{2278}: cherry-pick: ASoC: wcd9330: update non cacheable registers to fix SSR mute
+4d0af215d33d HEAD@{2279}: cherry-pick: ASoC: wcd9330: Avoid caching of codec digital registers
+ff79f7a51be5 HEAD@{2280}: cherry-pick: ASoC: wcd9330: Update MCLK Frequency select for 12.288MHz clock
+a0a732ea53a1 HEAD@{2281}: cherry-pick: ASoC: wcd9330: Update HPH class-h enables based on mbhc status
+2f2b7b4d3022 HEAD@{2282}: cherry-pick: asoc : msm: Fix zero size pointer issue
+32fb99d4ca8d HEAD@{2283}: cherry-pick: ASoC: msm: qdsp6v2: Fix an incorrect string comparison logic
+2b66e2f90c4f HEAD@{2284}: cherry-pick: ASoC: msm: qdsp6v2: return 0 when wait_for_timeout succeed
+15cdd4a2a32c HEAD@{2285}: cherry-pick: ASoC: wcd9330: correct HPH PA enable/disable setting
+1ef4f37f968a HEAD@{2286}: cherry-pick: ASoC: msm: qdsp6v2: Fix compress offload playback failures during SSR
+82306487256b HEAD@{2287}: cherry-pick: Asoc: msm: qdsp6v2: Track compress stream open properly
+da9dbe9eeae7 HEAD@{2288}: cherry-pick: ASoC: msm: q6dspv2: fix potentional information leak
+3ed6ee8dda03 HEAD@{2289}: cherry-pick: ASoC: msm: qdsp6v2: Correct buffer address data type
+833876fe3e6c HEAD@{2290}: cherry-pick: ASoC: msm: qdsp6v2: fix wma gapless failure
+c13c8c667d43 HEAD@{2291}: commit (amend): ASoC: wcd9xxx: don't bypass ncp
+fe48bfb91ac9 HEAD@{2292}: cherry-pick: ASoC: wcd9xxx: don't bypadd ncp
+e4ecc4e6dbe4 HEAD@{2293}: cherry-pick: ASoC: qdsp6v2: allow 24-bit playback
+3c3b7bbf84ae HEAD@{2294}: cherry-pick: [PATCH] dts_eagle: Cleanup
+78293c049c4a HEAD@{2295}: cherry-pick: drivers: dts_eagle software driver port
+9108ae8164d0 HEAD@{2296}: cherry-pick: qdsp6v2: dts_eagle: use newer drivers
+8701ea1eebe5 HEAD@{2297}: cherry-pick: sound: soc: codecs: wcd-mbhc-v2: Uncomment g_DebugMode check
+8916246b1556 HEAD@{2298}: cherry-pick: sound: wcd9330: Disable g_DebugMode
+5304b080daa8 HEAD@{2299}: cherry-pick: Initial AudioWizard bringup
+bcabfbfd9f05 HEAD@{2300}: cherry-pick: sound: DTS-Eagle integration
+a55303b88750 HEAD@{2301}: cherry-pick: drivers: import of dts_eagle hardware driver
+9402ad800d40 HEAD@{2302}: cherry-pick: ASoC: wcd9xxx: enable interrupt requests to avoid stutters
+ac497bd56093 HEAD@{2303}: cherry-pick: ASoC: dpcm: fix BE dai not hw_free and shutdown
+960a3ef5443a HEAD@{2304}: cherry-pick: ASoC: msm: qdsp6v2: Fix uninitialized variable error
+0f3f56641db3 HEAD@{2305}: cherry-pick: ASoC: msm: qdsp6v2: Add mutex protection for rtac cal apis
+ac7fe220f2bc HEAD@{2306}: cherry-pick: sound: soc: wcd9330: prevent access to null pointers
+795d6d4c4d33 HEAD@{2307}: cherry-pick: ASoC: msm: qdsp6v2: DAP: Enable non DAP modules on DAP disable
+66b1afa495e1 HEAD@{2308}: cherry-pick: ASoC: msm: qdsp6v2: Add support to query adsp version
+4bdddcb91e1d HEAD@{2309}: cherry-pick: ASoC: msm: handle null pointer access issue at audio client
+c0776b515d4d HEAD@{2310}: cherry-pick: ASoC: lsm-client: Fix null pointer access when no LSM session
+dfa8cc0baf6a HEAD@{2311}: cherry-pick: ASoC: msm: qdsp6v2: Fix incorrect update of memory map table contents
+d3b4a98ab270 HEAD@{2312}: cherry-pick: ASoC: msm: qdsp6v2: Query Cal data for correct path type
+8851c8a40f54 HEAD@{2313}: cherry-pick: ASoC: msm: qdsp6v2: fix wma gapless failure
+9bda31d22800 HEAD@{2314}: cherry-pick: ASoC: pcm: Add delay_blk feature
+f30db88dae2f HEAD@{2315}: cherry-pick: ASoC: wcd9330: Fix the fll clock settings
+f98ac40c484f HEAD@{2316}: cherry-pick: msm: qdsp6v2: do not call trace_printk on non-debug build
+38a0d2ff2255 HEAD@{2317}: cherry-pick: ASoC: wcd_cpe_core: add size check for WDSP ELF files
+45babedcc5a4 HEAD@{2318}: cherry-pick: ASoC: wcd_cpe: Fix message queue list corruption
+e73f1694fb25 HEAD@{2319}: cherry-pick: ASoC: wcd_cpe_core: Fix race conditions during message transfer
+9f92ffdb77af HEAD@{2320}: cherry-pick: ASoC: wcd_cpe_core: Refactor CPE core driver
+e8f027a53bd9 HEAD@{2321}: cherry-pick: ASoC: Fix use-after-free at card unregistration
+41225a7c2dc5 HEAD@{2322}: cherry-pick: ASoC: msm: qdsp6v2: set token for stereo_to_custom_stereo command
+a073d5380904 HEAD@{2323}: cherry-pick: ASoC: wcdxxxx: queue work on power efficient wq
+d3be55dab714 HEAD@{2324}: cherry-pick: ASoC: wm8994: Use power efficient workqueue
+a62d05acc1bd HEAD@{2325}: cherry-pick: ASoC: compress: Derive substream from stream based on direction
+3b669b9bd727 HEAD@{2326}: cherry-pick: ASoC: msm: qdsp6v2: Add mutex in afe_map_cal_data
+4036a531b577 HEAD@{2327}: cherry-pick: ASoC: core: Don't assign an out-of-bounds address to rtd_aux
+67e4abad4eb9 HEAD@{2328}: cherry-pick: ASoC: msm: Add support for 128KHz in the compress driver
+a6e61fb38881 HEAD@{2329}: cherry-pick: ASoC: msm-cpe: Resolve memory out of bound access
+8ab4be79b272 HEAD@{2330}: cherry-pick: ASoC: wcd_cpe_core: Perform irq cleanup once the bus is up
+986c9e39ed34 HEAD@{2331}: cherry-pick: ASoC: wcd9330: Update the codec MAD dai for 24 bit support
+5d32b87d5926 HEAD@{2332}: cherry-pick: ASoC: wcd9330: Update slim RX port disconnect sequence
+c341638c0f35 HEAD@{2333}: cherry-pick: ASoC: wcd9xxx-mbhc: fix codec power leakage during suspend
+f2a55e4ca93b HEAD@{2334}: cherry-pick: ASoC: wcd9xxx: Avoid micbias glitches during audio playback
+0f143019a960 HEAD@{2335}: cherry-pick: ASoC: msm: qdsp6v2: Change audio drivers to use %pK
+9deb28972080 HEAD@{2336}: cherry-pick: ASoC: add G711 audio encoding support
+28dd0b3e4c16 HEAD@{2337}: cherry-pick: ASoC: msm: Add support for 44.1KHz native playback
+11c9467b6151 HEAD@{2338}: commit (amend): ASoC: wcd-mbhc-v2: import changes from Sony
+76e12de8cc37 HEAD@{2339}: cherry-pick: wcd-mbhc-v2: include fixes from SONY 3.18 wcd-mbhc-v2 driver
+48684a591e73 HEAD@{2340}: commit (amend): ASoC: Kconfig: select SND_SOC_MBHC under wcd9330
+ce8f7b996c06 HEAD@{2341}: cherry-pick: ASoC: select SND_SOC_MBHC under wcd9330
+8c2c5a203341 HEAD@{2342}: cherry-pick: ASoC: mbhc: Add stub definition for mbhc deinit
+06572dbf2454 HEAD@{2343}: cherry-pick: ASoC: wcd-mbhc: Refactor WCD MBHC driver
+d2128adb0d7b HEAD@{2344}: cherry-pick: ASoC: wcd-mbhc: correct headphone detection
+d67a20d54bf6 HEAD@{2345}: cherry-pick: ASoc: wcd: change button thresholds according to new button range
+abfe1940c99d HEAD@{2346}: cherry-pick: ALSA: pcm: Uninline snd_pcm_stream_lock() and _unlock()
+2cc0f82deb18 HEAD@{2347}: cherry-pick: ALSA: pcm: Allow nonatomic trigger operations
+fbb9ae051e6b HEAD@{2348}: cherry-pick: ASoC: msm: qdsp6v2: move adsp_err to c source file
+583ce49756e5 HEAD@{2349}: cherry-pick: sound: adsp_err: initial version of adsp error code header file
+1731c4844833 HEAD@{2350}: cherry-pick: ASoC: msm: Add hwdep node for NOIRQ FE
+32be7a209a9e HEAD@{2351}: cherry-pick: FROMLIST: msm: qdsp6v2: set pointer to NULL after free
+8f49638ec33f HEAD@{2352}: cherry-pick: ASoC: msm: qdsp6v2: Change device switch handling
+1bfa503d108b HEAD@{2353}: cherry-pick: ASoC: msm: qdspv2: add support for MULTI_CHANNEL_PCM_V3 command
+935f831f1dcc HEAD@{2354}: cherry-pick: ASoC: msm: qdsp6v2: pull mode playback and push mode record
+bc001a5802a2 HEAD@{2355}: cherry-pick: Enhanced Slimbus CLK
+783f87335254 HEAD@{2356}: cherry-pick: slimbus: increase frequencies
+6523a85fdd11 HEAD@{2357}: cherry-pick: slimbus: fixed wrong header. New header for apr.h is linux/inlude/apr.h
+7d03ea6cca38 HEAD@{2358}: cherry-pick: slimbus: remove sps header file. sps header file is from an older location as sps diver. New location is include/linux. Resolves the warnings/erros from client drivers due to new sps header changes.
+ea7915c669e8 HEAD@{2359}: rebase -i (finish): returning to refs/heads/latest
+ea7915c669e8 HEAD@{2360}: rebase -i (squash): staging: qcacld-2.0: noerror unfixable warnings
+4c5e7ecfc440 HEAD@{2361}: rebase -i (start): checkout 3e37da643ccd
+280d7704de3d HEAD@{2362}: cherry-pick: staging: qcacld-2.0: noerror some warnings for gcc9
+4c5e7ecfc440 HEAD@{2363}: cherry-pick: staging: qcacld-2.0: noerror some warnings for gcc8
+3e37da643ccd HEAD@{2364}: cherry-pick: Fix all GCC 7.x warnings
+409aea1b3450 HEAD@{2365}: cherry-pick: Fix all GCC 6.x warnings
+19f26aa7e53d HEAD@{2366}: cherry-pick: bullhead: Fix Kconfig warnings
+77e80db4a7a8 HEAD@{2367}: rebase -i (finish): returning to refs/heads/latest
+77e80db4a7a8 HEAD@{2368}: rebase -i (pick): uapi: Define __BITS_PER_LONG based on compiler target
+697e4c69b23c HEAD@{2369}: rebase -i (pick): ext[34]: fix double put in tmpfile
+a6e17460877c HEAD@{2370}: rebase -i (pick): ext4: fix a BUG when opening a file with O_TMPFILE flag
+2d5c2d042234 HEAD@{2371}: rebase -i (pick): ext4: ->tmpfile() support
+3f364f521b09 HEAD@{2372}: rebase -i (pick): ext3 ->tmpfile() support
+300ae1220cf8 HEAD@{2373}: rebase -i (pick): allow the temp files created by open() to be linked to
+96ed9158bbd3 HEAD@{2374}: rebase -i (pick): path_openat(): fix double fput()
+cec46083ed72 HEAD@{2375}: rebase -i (pick): fs: allow open(dir, O_TMPFILE|..., 0) with mode 0
+21b3ead22d99 HEAD@{2376}: rebase -i (pick): fs: Fix file mode for O_TMPFILE
+cca2e84d963a HEAD@{2377}: rebase -i (pick): vfs: add missing check for __O_TMPFILE in fcntl_init()
+f9bf36c24024 HEAD@{2378}: rebase -i (pick): allow O_TMPFILE to work with O_WRONLY
+0f9a09b53e6e HEAD@{2379}: rebase -i (pick): Safer ABI for O_TMPFILE
+4aa839947023 HEAD@{2380}: rebase -i (pick): [O_TMPFILE] it's still short a few helpers, but infrastructure should be OK now...
+6d330a2da40f HEAD@{2381}: rebase -i (pick): move d_rcu from overlapping d_child to overlapping d_alias
+c56627307dcd HEAD@{2382}: rebase -i (pick): allow build_open_flags() to return an error
+fc937219f7d1 HEAD@{2383}: rebase -i (pick): do_last(): fix missing checks for LAST_BIND case
+b4b2c06317da HEAD@{2384}: rebase -i (start): checkout b4b2c06317dafd7b6924da5b8f2285aefc1818d5
+3b6acfb32d33 HEAD@{2385}: reset: moving to 3b6acfb32d334767adbe7ea4d49ab441d63e893e
+49fef9c84a8b HEAD@{2386}: reset: moving to 49fef9c84a8b
+aa012d1ef9dd HEAD@{2387}: reset: moving to b885b30b617335786cb79f60414d588fdff64dc4~4
+0d0a2d141e05 HEAD@{2388}: reset: moving to b885b30b617335786cb79f60414d588fdff64dc4~3
+a03f2b5c5718 HEAD@{2389}: reset: moving to b885b30b617335786cb79f60414d588fdff64dc4~2
+f93b5f25aba2 HEAD@{2390}: reset: moving to b885b30b617335786cb79f60414d588fdff64dc4~1
+f93b5f25aba2 HEAD@{2391}: reset: moving to b885b30b617335786cb79f60414d588fdff64dc4~1
+b885b30b6173 HEAD@{2392}: reset: moving to b885b30b617335786cb79f60414d588fdff64dc4
+bc74e95e0890 HEAD@{2393}: reset: moving to bc74e95e089055d83a540351b38ff1fa73fe6361
+21612541607e HEAD@{2394}: cherry-pick: ASoC: msm8992/msm8994: add support for packed 24 bit
+3be0f3023733 HEAD@{2395}: cherry-pick: ASoC: wcd9330: add support for packed 24 bit.
+49fef9c84a8b HEAD@{2396}: cherry-pick: ASoC: audio: fix audio drops issue in HPH for loud clips
+40d90f504603 HEAD@{2397}: cherry-pick: ASoC: wcd9xxx: revert back the gnd-mic switch if flipped
+2b79ed7c433a HEAD@{2398}: cherry-pick: ASoC: wcd9330: update non cacheable registers to fix SSR mute
+030a659aec1b HEAD@{2399}: cherry-pick: ASoC: wcd9330: Avoid caching of codec digital registers
+0dfe61057610 HEAD@{2400}: cherry-pick: ASoC: wcd9330: Update MCLK Frequency select for 12.288MHz clock
+25b46b51418c HEAD@{2401}: cherry-pick: ASoC: wcd9330: Update HPH class-h enables based on mbhc status
+3a23a71d65d1 HEAD@{2402}: cherry-pick: asoc : msm: Fix zero size pointer issue
+96f59fcd1ee7 HEAD@{2403}: cherry-pick: ASoC: msm: qdsp6v2: Fix an incorrect string comparison logic
+8102838defd5 HEAD@{2404}: cherry-pick: ASoC: msm: qdsp6v2: return 0 when wait_for_timeout succeed
+ce55b3501dc3 HEAD@{2405}: cherry-pick: ASoC: wcd9330: correct HPH PA enable/disable setting
+43837a67c3e1 HEAD@{2406}: cherry-pick: ASoC: msm: qdsp6v2: Fix compress offload playback failures during SSR
+e2e7be674988 HEAD@{2407}: cherry-pick: Asoc: msm: qdsp6v2: Track compress stream open properly
+787aeb8c5cd7 HEAD@{2408}: cherry-pick: ASoC: msm: q6dspv2: fix potentional information leak
+e24d1c09c1a2 HEAD@{2409}: cherry-pick: ASoC: msm: qdsp6v2: Correct buffer address data type
+a93b6523eafd HEAD@{2410}: cherry-pick: ASoC: msm: qdsp6v2: fix wma gapless failure
+bc74e95e0890 HEAD@{2411}: commit (amend): ASoC: wcd9xxx: don't bypadd ncp
+8ae628d65d40 HEAD@{2412}: cherry-pick: Sound: fix static
+3b6782729c38 HEAD@{2413}: commit (amend): ASoC: wcd9330: support UHQA mode on all HiFi rates
+b60efdbbb614 HEAD@{2414}: cherry-pick: ASoC: wcd9330: support UHQA mode on all HiFi rates
+3b6acfb32d33 HEAD@{2415}: cherry-pick: uapi: Define __BITS_PER_LONG based on compiler target
+b01f91c4722a HEAD@{2416}: cherry-pick: ext[34]: fix double put in tmpfile
+4aff319b7f18 HEAD@{2417}: cherry-pick: ext4: fix a BUG when opening a file with O_TMPFILE flag
+3b753ae6b2f4 HEAD@{2418}: cherry-pick: ext4: ->tmpfile() support
+007beb0615a5 HEAD@{2419}: cherry-pick: ext3 ->tmpfile() support
+451f1c0fd989 HEAD@{2420}: cherry-pick: allow the temp files created by open() to be linked to
+d8c5e384374b HEAD@{2421}: cherry-pick: path_openat(): fix double fput()
+8b2bac291a05 HEAD@{2422}: cherry-pick: fs: allow open(dir, O_TMPFILE|..., 0) with mode 0
+5890a1d0f1e9 HEAD@{2423}: cherry-pick: fs: Fix file mode for O_TMPFILE
+e13c383b4e40 HEAD@{2424}: cherry-pick: vfs: add missing check for __O_TMPFILE in fcntl_init()
+08bfc2202131 HEAD@{2425}: cherry-pick: allow O_TMPFILE to work with O_WRONLY
+240980dda514 HEAD@{2426}: cherry-pick: Safer ABI for O_TMPFILE
+deb3e23cfe49 HEAD@{2427}: cherry-pick: [O_TMPFILE] it's still short a few helpers, but infrastructure should be OK now...
+8b37d35e71c9 HEAD@{2428}: cherry-pick: move d_rcu from overlapping d_child to overlapping d_alias
+6a7d2b75e9cb HEAD@{2429}: cherry-pick: allow build_open_flags() to return an error
+b4b2c06317da HEAD@{2430}: commit (amend): Makefile: cleanup and ignore some harmless warnings
+c352b82ca57d HEAD@{2431}: commit: Makefile: cleanup and ignore some harmless warnings
+ebd5a11bfdcc HEAD@{2432}: commit: defconfig: optimise for performance
+c231dc2b75e5 HEAD@{2433}: reset: moving to HEAD
+c231dc2b75e5 HEAD@{2434}: commit: defconfig: add zest's defconfig
+ef2159d82bed HEAD@{2435}: commit (merge): Merge FRANCO
+353ea61c22ee HEAD@{2436}: reset: moving to FETCH_HEAD
+ec456049a931 HEAD@{2437}: clone: from https://gitlab.com/ZKP/bullhead.git

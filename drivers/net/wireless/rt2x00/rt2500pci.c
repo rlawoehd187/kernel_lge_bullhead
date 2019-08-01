@@ -278,9 +278,9 @@ static void rt2500pci_config_filter(struct rt2x00_dev *rt2x00dev,
 	rt2x00_set_field32(&reg, RXCSR0_DROP_CONTROL,
 			   !(filter_flags & FIF_CONTROL));
 	rt2x00_set_field32(&reg, RXCSR0_DROP_NOT_TO_ME,
-			   !(filter_flags & FIF_PROMISC_IN_BSS));
+			   !test_bit(CONFIG_MONITORING, &rt2x00dev->flags));
 	rt2x00_set_field32(&reg, RXCSR0_DROP_TODS,
-			   !(filter_flags & FIF_PROMISC_IN_BSS) &&
+			   !test_bit(CONFIG_MONITORING, &rt2x00dev->flags) &&
 			   !rt2x00dev->intf_ap_count);
 	rt2x00_set_field32(&reg, RXCSR0_DROP_VERSION_ERROR, 1);
 	rt2x00_set_field32(&reg, RXCSR0_DROP_MCAST,
