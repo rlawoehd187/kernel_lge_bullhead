@@ -1352,14 +1352,6 @@ static int __read_mostly sched_upmigrate_min_nice = 15;
 int __read_mostly sysctl_sched_upmigrate_min_nice = 15;
 
 /*
- * The load scale factor of a CPU gets boosted when its max frequency
- * is restricted due to which the tasks are migrating to higher capacity
- * CPUs early. The sched_upmigrate threshold is auto-upgraded by
- * rq->max_possible_freq/rq->max_freq of a lower capacity CPU.
- */
-unsigned int up_down_migrate_scale_factor = 1024;
-
-/*
  * Scheduler boost is a mechanism to temporarily place tasks on CPUs
  * with higher capacity than those where a task would have normally
  * ended up with their load characteristics. Any entity enabling
@@ -1374,35 +1366,6 @@ static inline int available_cpu_capacity(int cpu)
 	return rq->capacity;
 }
 
-void update_up_down_migrate(void)
-{
-	unsigned int up_migrate = pct_to_real(sysctl_sched_upmigrate_pct);
-	unsigned int down_migrate = pct_to_real(sysctl_sched_downmigrate_pct);
-	unsigned int delta;
-
-	if (up_down_migrate_scale_factor == 1024)
-		goto done;
-
-	delta = up_migrate - down_migrate;
-
-	up_migrate /= NSEC_PER_USEC;
-	up_migrate *= up_down_migrate_scale_factor;
-	up_migrate >>= 10;
-	up_migrate *= NSEC_PER_USEC;
-
-	up_migrate = min(up_migrate, sched_ravg_window);
-
-	down_migrate /= NSEC_PER_USEC;
-	down_migrate *= up_down_migrate_scale_factor;
-	down_migrate >>= 10;
-	down_migrate *= NSEC_PER_USEC;
-
-	down_migrate = min(down_migrate, up_migrate - delta);
-done:
-	sched_upmigrate = up_migrate;
-	sched_downmigrate = down_migrate;
-}
-
 void set_hmp_defaults(void)
 {
 	sched_spill_load =
@@ -1411,7 +1374,11 @@ void set_hmp_defaults(void)
 	sched_small_task =
 		pct_to_real(sysctl_sched_small_task_pct);
 
-	update_up_down_migrate();
+	sched_upmigrate =
+		pct_to_real(sysctl_sched_upmigrate_pct);
+
+	sched_downmigrate =
+		pct_to_real(sysctl_sched_downmigrate_pct);
 
 #ifdef CONFIG_SCHED_FREQ_INPUT
 	sched_heavy_task =
@@ -1631,23 +1598,10 @@ static DEFINE_MUTEX(boost_mutex);
 static void boost_kick_cpus(void)
 {
 	int i;
-	u32 nr_running;
 
 	for_each_online_cpu(i) {
-		/*
-		 * kick only "small" cluster
-		 */
-		if (cpu_rq(i)->capacity != max_capacity) {
-			nr_running = ACCESS_ONCE(cpu_rq(i)->nr_running);
-
-			/*
-			 * make sense to interrupt CPU if its runqueue
-			 * has something running in order to check for
-			 * migration afterwards, otherwise skip it.
-			 */
-			if (nr_running)
-				boost_kick(i);
-		}
+		if (cpu_rq(i)->capacity != max_capacity)
+			boost_kick(i);
 	}
 }
 
@@ -4317,7 +4271,7 @@ static void throttle_cfs_rq(struct cfs_rq *cfs_rq)
 
 	if (!se) {
 		sched_update_nr_prod(cpu_of(rq), task_delta, false);
-		sub_nr_running(rq, task_delta);
+		rq->nr_running -= task_delta;
 		dec_throttled_cfs_rq_hmp_stats(&rq->hmp_stats, cfs_rq);
 	}
 
@@ -4378,7 +4332,7 @@ void unthrottle_cfs_rq(struct cfs_rq *cfs_rq)
 
 	if (!se) {
 		sched_update_nr_prod(cpu_of(rq), task_delta, true);
-		add_nr_running(rq, task_delta);
+		rq->nr_running += task_delta;
 		inc_throttled_cfs_rq_hmp_stats(&rq->hmp_stats, tcfs_rq);
 	}
 
@@ -4924,11 +4878,7 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 
 	if (!se) {
 		update_rq_runnable_avg(rq, rq->nr_running);
-		add_nr_running(rq, 1);
-
-		if (unlikely(p->nr_cpus_allowed == 1))
-			rq->nr_pinned_tasks++;
-
+		inc_nr_running(rq);
 		inc_rq_hmp_stats(rq, p, 1);
 	}
 	hrtick_update(rq);
@@ -4991,11 +4941,7 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	}
 
 	if (!se) {
-		sub_nr_running(rq, 1);
-
-		if (unlikely(p->nr_cpus_allowed == 1))
-			rq->nr_pinned_tasks--;
-
+		dec_nr_running(rq);
 		update_rq_runnable_avg(rq, 1);
 		dec_rq_hmp_stats(rq, p, 1);
 	}
@@ -6079,13 +6025,12 @@ int can_migrate_task(struct task_struct *p, struct lb_env *env)
 
 	/*
 	 * Aggressive migration if:
-	 * 1) IDLE or NEWLY_IDLE balance.
-	 * 2) task is cache cold, or
-	 * 3) too many balance attempts have failed.
+	 * 1) task is cache cold, or
+	 * 2) too many balance attempts have failed.
 	 */
 
 	tsk_cache_hot = task_hot(p, env->src_rq->clock_task, env->sd);
-	if (env->idle != CPU_NOT_IDLE || !tsk_cache_hot ||
+	if (!tsk_cache_hot ||
 		env->sd->nr_balance_failed > env->sd->cache_nice_tries) {
 
 		if (tsk_cache_hot) {
@@ -6632,8 +6577,7 @@ fix_small_capacity(struct sched_domain *sd, struct sched_group *group)
  */
 static inline void update_sg_lb_stats(struct lb_env *env,
 			struct sched_group *group, int load_idx,
-			int local_group, int *balance, struct sg_lb_stats *sgs,
-			bool *overload)
+			int local_group, int *balance, struct sg_lb_stats *sgs)
 {
 	unsigned long nr_running, max_nr_running, min_nr_running;
 	unsigned long load, max_cpu_load, min_cpu_load;
@@ -6689,9 +6633,6 @@ static inline void update_sg_lb_stats(struct lb_env *env,
 		sgs->sum_nr_small_tasks += rq->hmp_stats.nr_small_tasks;
 		sgs->group_cpu_load += cpu_load(i);
 #endif
-
-		if (nr_running > 1) *overload = true;
-
 		sgs->sum_weighted_load += weighted_cpuload(i);
 		if (idle_cpu(i))
 			sgs->idle_cpus++;
@@ -6867,7 +6808,6 @@ static inline void update_sd_lb_stats(struct lb_env *env,
 	struct sched_group *sg = env->sd->groups;
 	struct sg_lb_stats sgs;
 	int load_idx, prefer_sibling = 0;
-	bool overload = false;
 
 	if (child && child->flags & SD_PREFER_SIBLING)
 		prefer_sibling = 1;
@@ -6879,8 +6819,7 @@ static inline void update_sd_lb_stats(struct lb_env *env,
 
 		local_group = cpumask_test_cpu(env->dst_cpu, sched_group_cpus(sg));
 		memset(&sgs, 0, sizeof(sgs));
-		update_sg_lb_stats(env, sg, load_idx, local_group, balance, &sgs,
-						&overload);
+		update_sg_lb_stats(env, sg, load_idx, local_group, balance, &sgs);
 
 		if (local_group && !(*balance))
 			return;
@@ -6930,13 +6869,6 @@ static inline void update_sd_lb_stats(struct lb_env *env,
 
 		sg = sg->next;
 	} while (sg != env->sd->groups);
-
-	if (!env->sd->parent) {
-		/* update overload indicator if we are at root domain */
-		if (env->dst_rq->rd->overload != overload)
-			env->dst_rq->rd->overload = overload;
-	}
-
 }
 
 /**
@@ -7344,8 +7276,6 @@ static struct rq *find_busiest_queue(struct lb_env *env,
 /* Working cpumask for load_balance and load_balance_newidle. */
 DEFINE_PER_CPU(cpumask_var_t, load_balance_mask);
 
-#define NEED_ACTIVE_BALANCE_THRESHOLD 10
-
 static int need_active_balance(struct lb_env *env)
 {
 	struct sched_domain *sd = env->sd;
@@ -7364,8 +7294,7 @@ static int need_active_balance(struct lb_env *env)
 			return 1;
 	}
 
-	return unlikely(sd->nr_balance_failed >
-			sd->cache_nice_tries + NEED_ACTIVE_BALANCE_THRESHOLD);
+	return unlikely(sd->nr_balance_failed > sd->cache_nice_tries+2);
 }
 
 /*
@@ -7577,9 +7506,7 @@ no_move:
 			 * We've kicked active balancing, reset the failure
 			 * counter.
 			 */
-			sd->nr_balance_failed =
-			    sd->cache_nice_tries +
-			    NEED_ACTIVE_BALANCE_THRESHOLD - 1;
+			sd->nr_balance_failed = sd->cache_nice_tries+1;
 		}
 	} else {
 		sd->nr_balance_failed = 0;
@@ -7658,8 +7585,7 @@ void idle_balance(int this_cpu, struct rq *this_rq)
 
 	this_rq->idle_stamp = this_rq->clock;
 
-	if (this_rq->avg_idle < sysctl_sched_migration_cost ||
-	    !this_rq->rd->overload)
+	if (this_rq->avg_idle < sysctl_sched_migration_cost)
 		return;
 
 	/* If this CPU is not the most power-efficient idle CPU in the
@@ -8125,17 +8051,12 @@ static void nohz_idle_balance(int this_cpu, enum cpu_idle_type idle)
 
 		rq = cpu_rq(balance_cpu);
 
-		/*
-		 * If time for next balance is due,
-		 * do the balance.
-		 */
-		if (time_after_eq(jiffies, rq->next_balance)) {
-			raw_spin_lock_irq(&rq->lock);
-			update_rq_clock(rq);
-			update_idle_cpu_load(rq);
-			raw_spin_unlock_irq(&rq->lock);
-			rebalance_domains(balance_cpu, CPU_IDLE);
-		}
+		raw_spin_lock_irq(&rq->lock);
+		update_rq_clock(rq);
+		update_idle_cpu_load(rq);
+		raw_spin_unlock_irq(&rq->lock);
+
+		rebalance_domains(balance_cpu, CPU_IDLE);
 
 		if (time_after(this_rq->next_balance, rq->next_balance))
 			this_rq->next_balance = rq->next_balance;
@@ -8159,22 +8080,6 @@ static inline int _nohz_kick_needed_hmp(struct rq *rq, int cpu, int *type)
 		(rq->nr_running - rq->hmp_stats.nr_small_tasks >= 2 ||
 		rq->nr_running > rq->mostly_idle_nr_run ||
 		cpu_load(cpu) > rq->mostly_idle_load)) {
-
-		if (unlikely(rq->nr_pinned_tasks > 0)) {
-			int delta = rq->nr_running - rq->nr_pinned_tasks;
-
-			/*
-		 	 * Check if it is possible to "unload" this CPU in case
-		 	 * of having pinned/affine tasks. Do not disturb idle core
-		 	 * if one of the below condition is true:
-		 	 *
-		 	 * - there is one pinned task and it is not "current"
-		 	 * - all tasks are pinned to this CPU
-		 	 */
-			if (delta < 2)
-				if (current->nr_cpus_allowed > 1 || !delta)
-					return 0;
-		}
 
 		if (rq->capacity == max_capacity)
 			return 1;
